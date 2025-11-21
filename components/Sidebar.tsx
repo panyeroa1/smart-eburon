@@ -1,8 +1,9 @@
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { FunctionCall, useSettings, useUI, useTools, useTopics, useVideoState } from '@/lib/state';
+import { FunctionCall, useSettings, useUI, useTools, useTopics, useVideoState, useLogStore } from '@/lib/state';
 import c from 'classnames';
 import { DEFAULT_LIVE_API_MODEL, VOICES, LANGUAGES, VOICE_STYLES, SPEECH_PACES } from '@/lib/constants';
 import { useLiveAPIContext } from '@/contexts/LiveAPIContext';
@@ -20,8 +21,10 @@ export default function Sidebar() {
   const { topics, selectedTopic, fetchTopics, setSelectedTopic, isLoading } = useTopics();
   const { connected } = useLiveAPIContext();
   const { playbackRate, setPlaybackRate, setVideoSource } = useVideoState();
+  const { addTurn } = useLogStore();
 
   const [editingTool, setEditingTool] = useState<FunctionCall | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     fetchTopics();
@@ -40,6 +43,16 @@ export default function Sidebar() {
       updateTool(editingTool.name, updatedTool);
     }
     setEditingTool(null);
+  };
+
+  const handleSaveSettings = () => {
+    addTurn({
+      role: 'system',
+      text: 'Settings saved successfully: Voice, Language, and Pace updated.',
+      isFinal: true,
+    });
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 2000);
   };
 
   return (
@@ -95,6 +108,14 @@ export default function Sidebar() {
                 </select>
               </label>
             </fieldset>
+            <button 
+              className={c('save-button', { saved: isSaved })} 
+              onClick={handleSaveSettings}
+              disabled={connected}
+            >
+              <span className="icon">{isSaved ? 'check' : 'save'}</span>
+              {isSaved ? 'Saved' : 'Save Settings'}
+            </button>
           </div>
 
           <div className="sidebar-section">

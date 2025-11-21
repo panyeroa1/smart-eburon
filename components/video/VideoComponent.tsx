@@ -100,6 +100,9 @@ export default function VideoComponent(props: VideoComponentProps) {
 
     // Stream frames at 5 FPS
     intervalRef.current = window.setInterval(processFrame, 200);
+    
+    // Capture and send an initial snapshot immediately
+    processFrame();
 
     return () => {
       if (intervalRef.current) {

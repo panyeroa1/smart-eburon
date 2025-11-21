@@ -14,6 +14,7 @@ import {
   useTopics,
   ConversationTurn,
   useUI,
+  useVideoState,
 } from '@/lib/state';
 
 const formatTimestamp = (date: Date) => {
@@ -55,6 +56,7 @@ export default function StreamingConsole() {
   const { client, setConfig } = useLiveAPIContext();
   const { systemPrompt, voice } = useSettings();
   const { selectedTopic } = useTopics();
+  const { videoSource } = useVideoState();
   const { tools } = useTools();
   const { isChatOpen, toggleChat } = useUI();
   const turns = useLogStore(state => state.turns);
@@ -83,6 +85,11 @@ export default function StreamingConsole() {
     } else {
         // Fallback if no topic is selected, though one should be selected by default
         finalSystemPrompt = finalSystemPrompt.replace(/\[Topic\]/g, "Technology Innovation");
+    }
+
+    // Add Video Source URL to system prompt for context
+    if (videoSource) {
+      finalSystemPrompt += `\n\n[Video Context]\nThe user is watching a video from: ${videoSource}`;
     }
 
     // Resolve Voice Name: Map 'Pitch Deck Speaker' to 'Fenrir' (Opal)
@@ -115,7 +122,7 @@ export default function StreamingConsole() {
     };
 
     setConfig(config);
-  }, [setConfig, systemPrompt, tools, voice, selectedTopic]);
+  }, [setConfig, systemPrompt, tools, voice, selectedTopic, videoSource]);
 
   useEffect(() => {
     const { addTurn, updateLastTurn } = useLogStore.getState();
